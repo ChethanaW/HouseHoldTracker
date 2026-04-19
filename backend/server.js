@@ -10,8 +10,8 @@ const PORT = process.env.PORT || 3001;
 
 // All allowed origins — add any URL that needs access
 const ALLOWED_ORIGINS = [
-  "https://chethanaW.github.io",
-  "https://chethanaW.github.io/HouseHoldTracker",
+  "https://chethanaw.github.io",              // GitHub Pages (all lowercase)
+  "https://chethanaw.github.io/HouseHoldTracker",
   "http://localhost:5173",
   "http://localhost:4173",
   process.env.FRONTEND_URL,
@@ -21,14 +21,12 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-
     // Normalize: strip trailing slash before comparing
-    const normalized = origin.replace(/\/$/, "");
-
-    if (ALLOWED_ORIGINS.some(allowed => allowed.replace(/\/$/, "") === normalized)) {
-      return callback(null, true);
-    }
-
+    const normalized = origin.replace(/\/$/, "").toLowerCase();
+    const allowed = ALLOWED_ORIGINS.some(
+      o => o.replace(/\/$/, "").toLowerCase() === normalized
+    );
+    if (allowed) return callback(null, true);
     console.warn(`CORS blocked request from: ${origin}`);
     callback(new Error(`CORS policy blocked origin: ${origin}`));
   },
@@ -39,7 +37,6 @@ app.use(cors({
 
 // Explicitly handle preflight for all routes
 app.options("*", cors());
-
 app.use(express.json());
 
 // Routes
@@ -55,9 +52,7 @@ app.get("/health", (_req, res) => {
   });
 });
 
-app.use((_req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
+app.use((_req, res) => res.status(404).json({ error: "Route not found" }));
 
 app.listen(PORT, () => {
   console.log(`\n🏠 Household Tracker API`);
