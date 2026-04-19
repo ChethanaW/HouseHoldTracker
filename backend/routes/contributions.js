@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "amount must be a positive number" });
   }
 
-  const validPeople = ["Me", "Sister"];
+  const validPeople = ["Chethana", "Saumya"];
   if (!validPeople.includes(person)) {
     return res.status(400).json({ error: `person must be one of: ${validPeople.join(", ")}` });
   }

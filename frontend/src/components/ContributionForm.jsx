@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const PEOPLE = ["Me", "Sister"];
+const PEOPLE = ["Chethana", "Saumya"];
 const CATEGORIES = ["Mortgage", "Property Tax", "Utilities"];
 
 // Use Vite proxy in dev (no VITE_API_URL), or the deployed URL in prod
@@ -182,7 +182,7 @@ function ToggleBtn({ label, active, onClick, colorVars }) {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function ContributionForm() {
-  const [person, setPerson] = useState("Me");
+  const [person, setPerson] = useState("Chethana");
   const [category, setCategory] = useState("Mortgage");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -245,8 +245,8 @@ export default function ContributionForm() {
   }
 
   const personColors = {
-    Me: { bg: "--color-person-me", border: "--color-person-me-border", text: "--color-person-me-text" },
-    Sister: { bg: "--color-person-sister", border: "--color-person-sister-border", text: "--color-person-sister-text" },
+    Chethana: { bg: "--color-person-chethana", border: "--color-person-chethana-border", text: "--color-person-chethana-text" },
+    Saumya: { bg: "--color-person-saumya", border: "--color-person-saumya-border", text: "--color-person-saumya-text" },
   };
 
   const now = new Date();

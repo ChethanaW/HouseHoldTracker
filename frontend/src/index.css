@@ -19,12 +19,12 @@
   --color-success-text: #2d7a45;
   --color-error-bg: #fdecea;
   --color-error-text: #c0392b;
-  --color-person-me: #dff0fd;
-  --color-person-me-text: #1565a8;
-  --color-person-me-border: #b3d7f7;
-  --color-person-sister: #fce9f7;
-  --color-person-sister-text: #8a2367;
-  --color-person-sister-border: #f0b8e3;
+  --color-person-chethana: #dff0fd;
+  --color-person-chethana-text: #1565a8;
+  --color-person-chethana-border: #b3d7f7;
+  --color-person-saumya: #fce9f7;
+  --color-person-saumya-text: #8a2367;
+  --color-person-saumya-border: #f0b8e3;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -45,12 +45,12 @@
     --color-success-text: #6fcf97;
     --color-error-bg: #2e1a1a;
     --color-error-text: #e07070;
-    --color-person-me: #1a2a3a;
-    --color-person-me-text: #7ab8e8;
-    --color-person-me-border: #2a3d50;
-    --color-person-sister: #2e1a2a;
-    --color-person-sister-text: #d68fc0;
-    --color-person-sister-border: #3e2438;
+    --color-person-chethana: #1a2a3a;
+    --color-person-chethana-text: #7ab8e8;
+    --color-person-chethana-border: #2a3d50;
+    --color-person-saumya: #2e1a2a;
+    --color-person-saumya-text: #d68fc0;
+    --color-person-saumya-border: #3e2438;
   }
 }
 

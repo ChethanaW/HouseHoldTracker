@@ -75,7 +75,7 @@ Test:
 ```bash
 curl -X POST http://localhost:3001/api/contributions \
   -H "Content-Type: application/json" \
-  -d '{"person":"Me","category":"Utilities","amount":120,"note":"Hydro April"}'
+  -d '{"person":"Chethana","category":"Utilities","amount":120,"note":"Hydro April"}'
 ```
 
 ### 4. Frontend
@@ -100,7 +100,7 @@ Open [http://localhost:5173](http://localhost:5173)
 | Col | Header | Example |
 |---|---|---|
 | A | Timestamp | 2026-04-18T10:30:00Z |
-| B | Person | Me |
+| B | Person | Chethana |
 | C | Category | Mortgage |
 | D | Amount | 1250.00 |
 | E | Note | April payment |
