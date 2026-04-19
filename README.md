@@ -1,4 +1,4 @@
-# 🏠 Household Tracker
+# 🏠 Household Tracker MVP 1
 
 A lightweight full-stack app to log shared household expenses (mortgage, property tax, utilities) directly into a Google Sheet.
 
