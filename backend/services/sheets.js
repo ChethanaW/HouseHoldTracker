@@ -9,8 +9,15 @@ const KEY_FILE = path.resolve(__dirname, "..", process.env.GOOGLE_KEY_FILE || "c
 const RAW_SHEET = "Raw Entries";
 
 function getAuth() {
+  if (process.env.GOOGLE_CREDENTIALS_JSON) {
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+    return new google.auth.GoogleAuth({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    });
+  }
   return new google.auth.GoogleAuth({
-    keyFile: KEY_FILE,
+    keyFile: path.resolve(__dirname, "..", process.env.GOOGLE_KEY_FILE),
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 }
