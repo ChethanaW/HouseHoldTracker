@@ -200,6 +200,26 @@ export default function ContributionForm() {
     setNote("");
   }
 
+  function getTimestamp() {
+    const now = new Date();
+    const estFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      fractionalSecondDigits: 3,
+      hour12: false,
+    });
+    
+    const parts = estFormatter.formatToParts(now);
+    const getType = (type) => parts.find(p => p.type === type).value;
+    const ms = parts.find(p => p.type === 'fractionalSecond')?.value || '000';
+    return `${getType('year')}-${getType('month')}-${getType('day')}T${getType('hour')}:${getType('minute')}:${getType('second')}.${ms}Z`;
+  } 
+
   async function handleSubmit() {
     if (!amount || parseFloat(amount) <= 0) {
       showToast("Enter a valid amount", "error");
@@ -209,6 +229,7 @@ export default function ContributionForm() {
     setLoading(true);
 
     const now = new Date();
+    const ts = getTimestamp();
     const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     const payload = {
@@ -216,7 +237,7 @@ export default function ContributionForm() {
       category,
       amount: parseFloat(amount),
       note: note.trim(),
-      timestamp: now.toISOString(),
+      timestamp: ts,
       monthKey,
     };
 
