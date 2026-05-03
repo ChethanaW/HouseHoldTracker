@@ -105,3 +105,22 @@ Open [http://localhost:5173](http://localhost:5173)
 | D | Amount | 1250.00 |
 | E | Note | April payment |
 | F | MonthKey | 2026-04 |
+
+
+
+
+--- Test local----
+
+F-end and B-end
+npm run dev
+
+--- Next to run and use ---
+
+git stage
+git commit -m "git push -u origin master"
+git push -u origin master
+
+B-end the server in Render picks up a change and does a restart automatically
+F-end 
+npm run deploy   (to publish changes online)
+sometime have to do cache cleanup in browser
