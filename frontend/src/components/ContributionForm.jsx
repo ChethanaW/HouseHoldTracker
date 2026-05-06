@@ -2,6 +2,7 @@ import { useState } from "react";
 
 const PEOPLE = ["Chethana", "Saumya"];
 const CATEGORIES = ["Mortgage", "Property Tax", "Utilities"];
+const UTILITY_TYPES = ["Water", "Electricity", "Gas"];
 
 // Use Vite proxy in dev (no VITE_API_URL), or the deployed URL in prod
 const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -184,6 +185,7 @@ function ToggleBtn({ label, active, onClick, colorVars }) {
 export default function ContributionForm() {
   const [person, setPerson] = useState("Chethana");
   const [category, setCategory] = useState("Mortgage");
+  const [utilityType, setUtilityType] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -235,6 +237,7 @@ export default function ContributionForm() {
     const payload = {
       person,
       category,
+      utilityType: category === "Utilities" ? utilityType : undefined,
       amount: parseFloat(amount),
       note: note.trim(),
       timestamp: ts,
@@ -298,10 +301,30 @@ export default function ContributionForm() {
           <label style={s.label}>Category</label>
           <div style={s.catRow}>
             {CATEGORIES.map((c) => (
-              <ToggleBtn key={c} label={c} active={category === c} onClick={() => setCategory(c)} />
+              <ToggleBtn
+                key={c}
+                label={c}
+                active={category === c}
+                onClick={() => {
+                  setCategory(c);
+                  if (c === "Utilities") setUtilityType(UTILITY_TYPES[0]);
+                  else setUtilityType("");
+                }}
+              />
             ))}
           </div>
         </div>
+
+        {category === "Utilities" && (
+          <div style={{ ...s.section }}>
+            <label style={s.label}>Utility Type</label>
+            <div style={s.toggleRow}>
+              {UTILITY_TYPES.map((u) => (
+                <ToggleBtn key={u} label={u} active={utilityType === u} onClick={() => setUtilityType(u)} />
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={s.divider} />
 
@@ -354,7 +377,7 @@ export default function ContributionForm() {
           <div style={s.preview}>
             <span style={s.previewAmount}>${parseFloat(amount).toFixed(2)}</span>
             {" · "}
-            {person} · {category} · {monthKey}
+            {person} · {category}{category === "Utilities" && utilityType ? ` · ${utilityType}` : ""} · {monthKey}
             {note.trim() && (
               <>
                 <br />

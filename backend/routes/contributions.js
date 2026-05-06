@@ -5,7 +5,7 @@ const router = Router();
 
 // POST /api/contributions
 router.post("/", async (req, res) => {
-  const { person, category, amount, note, timestamp, monthKey } = req.body;
+  const { person, category, amount, note, timestamp, monthKey, utilityType } = req.body;
 
   // Validate required fields
   if (!person || !category || amount === undefined || amount === null || amount === "") {
@@ -30,8 +30,15 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: `category must be one of: ${validCategories.join(", ")}` });
   }
 
+  if (category === "Utilities") {
+    const validUtilityTypes = ["Water", "Electricity", "Gas"];
+    if (!utilityType || !validUtilityTypes.includes(utilityType)) {
+      return res.status(400).json({ error: `utilityType must be one of: ${validUtilityTypes.join(", ")}` });
+    }
+  }
+
   try {
-    const result = await appendContribution({ person, category, amount: parsedAmount, note, timestamp, monthKey });
+    const result = await appendContribution({ person, category, utilityType, amount: parsedAmount, note, timestamp, monthKey });
     return res.status(201).json({
       success: true,
       message: "Entry logged to Google Sheet",

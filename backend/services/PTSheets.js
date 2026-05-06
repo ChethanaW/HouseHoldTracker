@@ -26,35 +26,37 @@ function getAuth() {
   });
 }
 
-export async function appendContribution({ person, category, amount, note, timestamp, monthKey }) {
+export async function appendContribution({ person, category, utilityType, amount, note, timestamp, monthKey }) {
   const auth = getAuth();
   const sheets = google.sheets({ version: "v4", auth });
   const now = new Date();
   const ts = timestamp || now.toISOString();
   const mk = monthKey || ts.slice(0, 7); // "2026-04"
-
-  const row = [
-    category,
-    person,
-    parseFloat(amount).toFixed(2),
-    ts,
-    mk,
-    note || "",
-  ];
+  let row;
+  let targetSheet = OTHER_SHEET;
+  let range = "A:F";
 
   if (category === "Mortgage") {
-    RAW_SHEET = MORTGAGE_SHEET;
+    targetSheet = MORTGAGE_SHEET;
   } else if (category === "Property Tax") {
-    RAW_SHEET = PROPERTY_TAX_SHEET;
+    targetSheet = PROPERTY_TAX_SHEET;
   } else if (category === "Utilities") {
-    RAW_SHEET = UTILITIES_SHEET;
+    targetSheet = UTILITIES_SHEET;
+    // UP sheet expects an extra column (Utility Type) as 2nd column
+    row = [category, utilityType || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
+    range = "A:G";
   } else {
-    RAW_SHEET = OTHER_SHEET;
+    targetSheet = OTHER_SHEET;
+  }
+
+  // Non-utilities default row format (A-F)
+  if (!row) {
+    row = [category, person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
   }
 
   const response = await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${RAW_SHEET}!A:F`,
+    range: `${targetSheet}!${range}`,
     valueInputOption: "USER_ENTERED",
     requestBody: { values: [row] },
   });
