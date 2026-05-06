@@ -31,7 +31,7 @@ router.post("/", async (req, res) => {
   }
 
   if (category === "Utilities") {
-    const validUtilityTypes = ["Water", "Electricity", "Gas"];
+    const validUtilityTypes = ["Water", "Electricity", "Gas", "Internet", "Safety", "MISC"];
     if (!utilityType || !validUtilityTypes.includes(utilityType)) {
       return res.status(400).json({ error: `utilityType must be one of: ${validUtilityTypes.join(", ")}` });
     }

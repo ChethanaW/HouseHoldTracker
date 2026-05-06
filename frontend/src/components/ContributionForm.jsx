@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const PEOPLE = ["Chethana", "Saumya"];
 const CATEGORIES = ["Mortgage", "Property Tax", "Utilities"];
-const UTILITY_TYPES = ["Water", "Electricity", "Gas"];
+const UTILITY_TYPES = ["Water", "Electricity", "Gas", "Internet", "Safety", "MISC"];
 
 // Use Vite proxy in dev (no VITE_API_URL), or the deployed URL in prod
 const API_BASE = import.meta.env.VITE_API_URL || "";
