@@ -9,7 +9,8 @@ const KEY_FILE = path.resolve(__dirname, "..", process.env.GOOGLE_KEY_FILE || "c
 var RAW_SHEET = "Raw Entries";
 const MORTGAGE_SHEET = "MP";
 const PROPERTY_TAX_SHEET = "PP";
-const UTILITIES_SHEET = "UP";  
+const UTILITIES_SHEET = "UP";
+const RENO_SHEET = "R+IP";
 const OTHER_SHEET = "OP";
 
 function getAuth() {
@@ -26,7 +27,7 @@ function getAuth() {
   });
 }
 
-export async function appendContribution({ person, category, utilityType, amount, note, timestamp, monthKey }) {
+export async function appendContribution({ person, category, type, amount, note, timestamp, monthKey }) {
   const auth = getAuth();
   const sheets = google.sheets({ version: "v4", auth });
   const now = new Date();
@@ -42,8 +43,13 @@ export async function appendContribution({ person, category, utilityType, amount
     targetSheet = PROPERTY_TAX_SHEET;
   } else if (category === "Utilities") {
     targetSheet = UTILITIES_SHEET;
-    // UP sheet expects an extra column (Utility Type) as 2nd column
-    row = [category, utilityType || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
+    // UP sheet expects an extra column (Type) as 2nd column
+    row = [category, type || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
+    range = "A:G";
+  } else if (category === "Reno+Insu") {
+    targetSheet = RENO_SHEET;
+    // R+IP sheet mirrors UP: extra Type column as 2nd column
+    row = [category, type || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
     range = "A:G";
   } else {
     targetSheet = OTHER_SHEET;

@@ -5,7 +5,7 @@ const router = Router();
 
 // POST /api/contributions
 router.post("/", async (req, res) => {
-  const { person, category, amount, note, timestamp, monthKey, utilityType } = req.body;
+  const { person, category, amount, note, timestamp, monthKey, type } = req.body;
 
   // Validate required fields
   if (!person || !category || amount === undefined || amount === null || amount === "") {
@@ -25,20 +25,26 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: `person must be one of: ${validPeople.join(", ")}` });
   }
 
-  const validCategories = ["Mortgage", "Property Tax", "Utilities"];
+  const validCategories = ["Mortgage", "Property Tax", "Utilities", "Reno+Insu"];
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: `category must be one of: ${validCategories.join(", ")}` });
   }
-
   if (category === "Utilities") {
     const validUtilityTypes = ["Water", "Electricity", "Gas", "Internet", "Safety", "MISC"];
-    if (!utilityType || !validUtilityTypes.includes(utilityType)) {
-      return res.status(400).json({ error: `utilityType must be one of: ${validUtilityTypes.join(", ")}` });
+    if (!type || !validUtilityTypes.includes(type)) {
+      return res.status(400).json({ error: `type must be one of: ${validUtilityTypes.join(", ")}` });
+    }
+  }
+
+  if (category === "Reno+Insu") {
+    const validRenoTypes = ["Insurance", "Renovations"];
+    if (!type || !validRenoTypes.includes(type)) {
+      return res.status(400).json({ error: `type must be one of: ${validRenoTypes.join(", ")}` });
     }
   }
 
   try {
-    const result = await appendContribution({ person, category, utilityType, amount: parsedAmount, note, timestamp, monthKey });
+    const result = await appendContribution({ person, category, type, amount: parsedAmount, note, timestamp, monthKey });
     return res.status(201).json({
       success: true,
       message: "Entry logged to Google Sheet",
