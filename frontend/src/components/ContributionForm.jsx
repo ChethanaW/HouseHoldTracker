@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const PEOPLE = ["Chethana", "Saumya"];
 const CATEGORIES = ["Mortgage", "Property Tax", "Utilities", "Reno+Insu"];
@@ -184,7 +184,21 @@ function ToggleBtn({ label, active, onClick, colorVars }) {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function ContributionForm() {
-  const [person, setPerson] = useState("Chethana");
+  const [person, setPerson] = useState(() => {
+    try {
+      return localStorage.getItem("selectedPerson") || "Chethana";
+    } catch (e) {
+      return "Chethana";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("selectedPerson", person);
+    } catch (e) {
+      // ignore (e.g., privacy mode)
+    }
+  }, [person]);
   const [category, setCategory] = useState("Mortgage");
   const [subType, setSubType] = useState("");
   const [amount, setAmount] = useState("");
