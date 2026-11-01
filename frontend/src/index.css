@@ -17,6 +17,8 @@
   --color-accent-light: #eeecfd;
   --color-success-bg: #eaf4ee;
   --color-success-text: #2d7a45;
+  --color-warn-bg: #fdf3dc;
+  --color-warn-text: #946200;
   --color-error-bg: #fdecea;
   --color-error-text: #c0392b;
   --color-person-chethana: #dff0fd;
@@ -43,6 +45,8 @@
     --color-accent-light: #2a2347;
     --color-success-bg: #1a2e20;
     --color-success-text: #6fcf97;
+    --color-warn-bg: #33291a;
+    --color-warn-text: #e8b95a;
     --color-error-bg: #2e1a1a;
     --color-error-text: #e07070;
     --color-person-chethana: #1a2a3a;

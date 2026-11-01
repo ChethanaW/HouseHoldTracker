@@ -1,9 +1,31 @@
 import { useState, useEffect } from "react";
+import MonthlySummary from "./MonthlySummary.jsx";
 
 const PEOPLE = ["Chethana", "Saumya"];
-const CATEGORIES = ["Mortgage", "Property Tax", "Utilities", "Reno+Insu"];
+const CATEGORIES = ["Mortgage", "Property Tax", "Utilities", "Home Expenses", "Groceries", "Reno+Insu"];
 const UTILITY_TYPES = ["Water", "Electricity", "Gas", "Internet", "Safety", "MISC"];
 const RENO_TYPES = ["Insurance", "Renovations"];
+
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function buildMonthOptions() {
+  const today = new Date();
+  const result = [];
+
+  for (let offset = -1; offset <= 1; offset += 1) {
+    const date = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    result.push({
+      label: date.toLocaleString("en-US", { month: "short", year: "numeric" }),
+      value: getMonthKey(date),
+    });
+  }
+
+  return result;
+}
+
+const MONTH_OPTIONS = buildMonthOptions();
 
 // Use Vite proxy in dev (no VITE_API_URL), or the deployed URL in prod
 const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -107,6 +129,14 @@ const s = {
     fontWeight: "600",
     color: "var(--color-accent)",
   },
+  monthBar: {
+    width: "100%",
+    maxWidth: "420px",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "6px",
+    marginBottom: "12px",
+  },
   submitBtn: {
     width: "100%",
     marginTop: "1.25rem",
@@ -199,13 +229,47 @@ export default function ContributionForm() {
       // ignore (e.g., privacy mode)
     }
   }, [person]);
+
   const [category, setCategory] = useState("Mortgage");
-  const [subType, setSubType] = useState("");
+  const [subType, setSubType] = useState(UTILITY_TYPES[0]);
+  const [selectedMonthKey, setSelectedMonthKey] = useState(() => getMonthKey());
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null); // { msg, type }
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState(false);
+  const [summaryRefresh, setSummaryRefresh] = useState(0);
+  const [summary, setSummary] = useState([]);
+  const [toast, setToast] = useState(null);
   const [focusedField, setFocusedField] = useState(null);
+
+  // Reload the summary when the month changes or after an entry is logged
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSummary() {
+      setSummaryLoading(true);
+      setSummaryError(false);
+      try {
+        const res = await fetch(`${API_BASE}/api/contributions/summary?monthKey=${encodeURIComponent(selectedMonthKey)}`);
+        if (!res.ok) throw new Error("Failed to load summary");
+        const data = await res.json();
+        if (!cancelled) setSummary(data.summary || []);
+      } catch (error) {
+        if (!cancelled) {
+          setSummary([]);
+          setSummaryError(true);
+        }
+      } finally {
+        if (!cancelled) setSummaryLoading(false);
+      }
+    }
+
+    loadSummary();
+    return () => {
+      cancelled = true; // ignore stale responses when switching months quickly
+    };
+  }, [selectedMonthKey, summaryRefresh]);
 
   function showToast(msg, type = "success") {
     setToast({ msg, type });
@@ -215,27 +279,29 @@ export default function ContributionForm() {
   function reset() {
     setAmount("");
     setNote("");
+    setCategory("Mortgage");
+    setSubType(UTILITY_TYPES[0]);
   }
 
   function getTimestamp() {
     const now = new Date();
-    const estFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    const estFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
       fractionalSecondDigits: 3,
       hour12: false,
     });
-    
+
     const parts = estFormatter.formatToParts(now);
-    const getType = (type) => parts.find(p => p.type === type).value;
-    const ms = parts.find(p => p.type === 'fractionalSecond')?.value || '000';
-    return `${getType('year')}-${getType('month')}-${getType('day')}T${getType('hour')}:${getType('minute')}:${getType('second')}.${ms}Z`;
-  } 
+    const getType = (type) => parts.find((p) => p.type === type).value;
+    const ms = parts.find((p) => p.type === "fractionalSecond")?.value || "000";
+    return `${getType("year")}-${getType("month")}-${getType("day")}T${getType("hour")}:${getType("minute")}:${getType("second")}.${ms}Z`;
+  }
 
   async function handleSubmit() {
     if (!amount || parseFloat(amount) <= 0) {
@@ -245,18 +311,16 @@ export default function ContributionForm() {
 
     setLoading(true);
 
-    const now = new Date();
     const ts = getTimestamp();
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
     const payload = {
       person,
       category,
-      type: (category === "Utilities" || category === "Reno+Insu") ? subType : undefined,
+      type: category === "Utilities" || category === "Reno+Insu" ? subType : undefined,
       amount: parseFloat(amount),
       note: note.trim(),
       timestamp: ts,
-      monthKey,
+      monthKey: selectedMonthKey,
     };
 
     try {
@@ -273,6 +337,7 @@ export default function ContributionForm() {
 
       showToast("Entry logged ✓");
       reset();
+      setSummaryRefresh((n) => n + 1); // stay on the selected month and reload its summary
     } catch (err) {
       const msg = err.message.includes("Failed to fetch")
         ? "Can't reach backend — is it running?"
@@ -288,16 +353,25 @@ export default function ContributionForm() {
     Saumya: { bg: "--color-person-saumya", border: "--color-person-saumya-border", text: "--color-person-saumya-text" },
   };
 
-  const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const selectedMonth = MONTH_OPTIONS.find((m) => m.value === selectedMonthKey) || MONTH_OPTIONS[1];
   const showPreview = !!amount && parseFloat(amount) > 0;
 
   return (
     <>
+      <div style={s.monthBar} role="group" aria-label="Month">
+        {MONTH_OPTIONS.map((month) => (
+          <ToggleBtn
+            key={month.value}
+            label={month.label}
+            active={selectedMonthKey === month.value}
+            onClick={() => setSelectedMonthKey(month.value)}
+          />
+        ))}
+      </div>
+
       <div style={s.card}>
-        {/* Person */}
         <div style={s.section}>
-          <label style={s.label}>Who's paying?</label>
+          <label style={s.label}>Who’s paying?</label>
           <div style={s.toggleRow}>
             {PEOPLE.map((p) => (
               <ToggleBtn
@@ -311,7 +385,6 @@ export default function ContributionForm() {
           </div>
         </div>
 
-        {/* Category */}
         <div style={s.section}>
           <label style={s.label}>Category</label>
           <div style={s.catRow}>
@@ -333,7 +406,7 @@ export default function ContributionForm() {
 
         {category === "Utilities" && (
           <div style={{ ...s.section }}>
-            <label style={s.label}>Utility Type</label>
+            <label style={s.label}>Utility type</label>
             <div style={s.toggleRow}>
               {UTILITY_TYPES.map((u) => (
                 <ToggleBtn key={u} label={u} active={subType === u} onClick={() => setSubType(u)} />
@@ -355,7 +428,6 @@ export default function ContributionForm() {
 
         <div style={s.divider} />
 
-        {/* Amount */}
         <div style={s.section}>
           <label style={s.label}>Amount</label>
           <div style={s.amountWrap}>
@@ -378,7 +450,6 @@ export default function ContributionForm() {
           </div>
         </div>
 
-        {/* Note */}
         <div style={{ ...s.section, marginBottom: 0 }}>
           <label style={s.label}>
             Note{" "}
@@ -399,12 +470,12 @@ export default function ContributionForm() {
           />
         </div>
 
-        {/* Preview */}
         {showPreview && (
           <div style={s.preview}>
             <span style={s.previewAmount}>${parseFloat(amount).toFixed(2)}</span>
             {" · "}
-            {person} · {category}{subType ? ` · ${subType}` : ""} · {monthKey}
+            {person} · {category}
+            {subType ? ` · ${subType}` : ""} · {selectedMonthKey}
             {note.trim() && (
               <>
                 <br />
@@ -414,7 +485,6 @@ export default function ContributionForm() {
           </div>
         )}
 
-        {/* Submit */}
         <button
           style={{
             ...s.submitBtn,
@@ -426,11 +496,18 @@ export default function ContributionForm() {
           onMouseEnter={(e) => { if (!loading) e.target.style.background = "var(--color-accent-hover)"; }}
           onMouseLeave={(e) => { if (!loading) e.target.style.background = "var(--color-accent)"; }}
         >
-          {loading ? "Logging…" : "Log Entry"}
+          {loading ? "Logging…" : `Log Entry for ${selectedMonth.label}`}
         </button>
       </div>
 
-      {/* Toast notification */}
+      <MonthlySummary
+        summary={summary}
+        loading={summaryLoading}
+        error={summaryError}
+        monthLabel={selectedMonth.label}
+        onRetry={() => setSummaryRefresh((n) => n + 1)}
+      />
+
       {toast && (
         <div style={s.toast(toast.type)}>
           {toast.msg}
