@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 
 const PEOPLE = ["Chethana", "Saumya"];
-const CATEGORIES = ["Mortgage", "Property Tax", "Utilities", "Reno+Insu"];
+const CATEGORIES = ["HH Groceries", "P Groceries", "Utilities", "Renovations"];
 const UTILITY_TYPES = ["Water", "Electricity", "Gas", "Internet", "Safety", "MISC"];
-const RENO_TYPES = ["Insurance", "Renovations"];
 
 // Use Vite proxy in dev (no VITE_API_URL), or the deployed URL in prod
 const API_BASE = import.meta.env.VITE_API_URL || "";
@@ -199,7 +198,7 @@ export default function ContributionForm() {
       // ignore (e.g., privacy mode)
     }
   }, [person]);
-  const [category, setCategory] = useState("Mortgage");
+  const [category, setCategory] = useState("HH Groceries");
   const [subType, setSubType] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -230,12 +229,12 @@ export default function ContributionForm() {
       fractionalSecondDigits: 3,
       hour12: false,
     });
-    
+
     const parts = estFormatter.formatToParts(now);
     const getType = (type) => parts.find(p => p.type === type).value;
     const ms = parts.find(p => p.type === 'fractionalSecond')?.value || '000';
     return `${getType('year')}-${getType('month')}-${getType('day')}T${getType('hour')}:${getType('minute')}:${getType('second')}.${ms}Z`;
-  } 
+  }
 
   async function handleSubmit() {
     if (!amount || parseFloat(amount) <= 0) {
@@ -252,7 +251,7 @@ export default function ContributionForm() {
     const payload = {
       person,
       category,
-      type: (category === "Utilities" || category === "Reno+Insu") ? subType : undefined,
+      type: category === "Utilities" ? subType : undefined,
       amount: parseFloat(amount),
       note: note.trim(),
       timestamp: ts,
@@ -323,7 +322,6 @@ export default function ContributionForm() {
                 onClick={() => {
                   setCategory(c);
                   if (c === "Utilities") setSubType(UTILITY_TYPES[0]);
-                  else if (c === "Reno+Insu") setSubType(RENO_TYPES[0]);
                   else setSubType("");
                 }}
               />
@@ -337,17 +335,6 @@ export default function ContributionForm() {
             <div style={s.toggleRow}>
               {UTILITY_TYPES.map((u) => (
                 <ToggleBtn key={u} label={u} active={subType === u} onClick={() => setSubType(u)} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {category === "Reno+Insu" && (
-          <div style={{ ...s.section }}>
-            <label style={s.label}>Type</label>
-            <div style={s.toggleRow}>
-              {RENO_TYPES.map((r) => (
-                <ToggleBtn key={r} label={r} active={subType === r} onClick={() => setSubType(r)} />
               ))}
             </div>
           </div>
@@ -428,14 +415,11 @@ export default function ContributionForm() {
         >
           {loading ? "Logging…" : "Log Entry"}
         </button>
-      </div>
 
-      {/* Toast notification */}
-      {toast && (
-        <div style={s.toast(toast.type)}>
-          {toast.msg}
-        </div>
-      )}
+        {toast && (
+          <div style={s.toast(toast.type)}>{toast.msg}</div>
+        )}
+      </div>
     </>
   );
 }

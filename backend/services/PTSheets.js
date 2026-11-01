@@ -7,10 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID || '14X_ovUGckP1TJgoGaeIKe3AB-wiEq00HCqNOZ-Q_fGI';
 const KEY_FILE = path.resolve(__dirname, "..", process.env.GOOGLE_KEY_FILE || "credentials.json");
 var RAW_SHEET = "Raw Entries";
-const MORTGAGE_SHEET = "MP";
-const PROPERTY_TAX_SHEET = "PP";
+const HHG_SHEET = "HHG";
+const PG = "PG";
 const UTILITIES_SHEET = "UP";
-const RENO_SHEET = "R+IP";
+const RENO_SHEET = "R";
 const OTHER_SHEET = "OP";
 
 function getAuth() {
@@ -27,6 +27,14 @@ function getAuth() {
   });
 }
 
+function resolveTargetSheet(category) {
+  if (category === "HH Groceries") return HHG_SHEET;
+  if (category === "P Groceries") return PG;
+  if (category === "Utilities") return UTILITIES_SHEET;
+  if (category === "Renovations") return RENO_SHEET;
+  return OTHER_SHEET;
+}
+
 export async function appendContribution({ person, category, type, amount, note, timestamp, monthKey }) {
   const auth = getAuth();
   const sheets = google.sheets({ version: "v4", auth });
@@ -34,29 +42,18 @@ export async function appendContribution({ person, category, type, amount, note,
   const ts = timestamp || now.toISOString();
   const mk = monthKey || ts.slice(0, 7); // "2026-04"
   let row;
-  let targetSheet = OTHER_SHEET;
+  const targetSheet = resolveTargetSheet(category);
   let range = "A:F";
 
-  if (category === "Mortgage") {
-    targetSheet = MORTGAGE_SHEET;
-  } else if (category === "Property Tax") {
-    targetSheet = PROPERTY_TAX_SHEET;
-  } else if (category === "Utilities") {
-    targetSheet = UTILITIES_SHEET;
-    // UP sheet expects an extra column (Type) as 2nd column
+  if (category === "Utilities") {
     row = [category, type || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
     range = "A:G";
-  } else if (category === "Reno+Insu") {
-    targetSheet = RENO_SHEET;
-    // R+IP sheet mirrors UP: extra Type column as 2nd column
+  } else if (category === "Renovations") {
     row = [category, type || "", person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
     range = "A:G";
+  } else if (category === "HH Groceries" || category === "P Groceries") {
+    row = [category, person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
   } else {
-    targetSheet = OTHER_SHEET;
-  }
-
-  // Non-utilities default row format (A-F)
-  if (!row) {
     row = [category, person, parseFloat(amount).toFixed(2), ts, mk, note || ""];
   }
 
