@@ -25,7 +25,12 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: `person must be one of: ${validPeople.join(", ")}` });
   }
 
-  const validCategories = ["Mortgage", "Property Tax", "Utilities", "Reno+Insu"];
+  const validCategories = [
+    "HH Groceries",
+    "P Groceries",
+    "Utilities",
+    "Renovations",
+  ];
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: `category must be one of: ${validCategories.join(", ")}` });
   }
@@ -36,7 +41,7 @@ router.post("/", async (req, res) => {
     }
   }
 
-  if (category === "Reno+Insu") {
+  if (category === "Renovations") {
     const validRenoTypes = ["Insurance", "Renovations"];
     if (!type || !validRenoTypes.includes(type)) {
       return res.status(400).json({ error: `type must be one of: ${validRenoTypes.join(", ")}` });
