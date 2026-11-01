@@ -1,0 +1,36 @@
+Given the latest Front end and backend code.
+
+Next Phase 3
+1)A ui interface change -> when selected Utilities (Only), create another selection category below that includes the following slections;
+Water, Electricity, and Gas. This selection category should not show up when Morgage or Property tax is selected
+2)in the excel sheet -> specifically UP sheet will have an additional column (2nd Column), with new column title="Utility Type".
+3) Back end change -> Selected Utility types should be updated properly in the respective sheet (in this case UP) when Utility and its utility type is selected by the user
+
+
+Phase 3 part 2
+1) Add additional utility types as follows,
+Internet, Safety, MISC 
+
+Phase 3 part 3
+1) UI change -> Add a new category called "Reno+Insu", when selected create another selection category below that includes the following selections; 
+Insurance and Renovations. This selection category should only show when this new category is selevcted
+2) There will be a new excel sheet called "R+IP" with same structure as UP sheet. "R+IP" sheet's 2nd column called Type.
+3) Back end change -> Selected type should be updated properly in the respective sheet (in this case "R+IP") when new category "Reno+Insu" selected and its Type is selected by the user
+
+Phase 4 
+1) During an Entry complete/refresh, all the selections goes to default, but I want the Whos' Paying to keep what is selected by the user.
+So if I'm chethana, I want each refresh the selection to that remain as "Chethana selected", but for Saumya in her end to rmain "Saumya" selected as always
+
+Phase 5 (new version-2.0.0)
+1) New Section under like a Summary of who paid and what
+Example
+Morgage
+Chethana - Paid - $1234
+Saumya - Not-Paid 
+2) Add a feature to add values for current month, 1 month before and 1 month next
+Goal is that I could keep track in the app
+
+version 2.1.0
+1) Who;s paying remains. 
+2)Fixed Categories : Utilities (sub catg: Water, elctricity, Gas, Internet), Home_expenses and Groceries
+
